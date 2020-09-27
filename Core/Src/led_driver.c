@@ -12,7 +12,7 @@
 #define LED0 60
 #define LED1 30
 
-#define BYTES_PER_LED 3
+#define BYTES_PER_LED 4
 #define BITS_PER_LED BYTES_PER_LED*8
 #define NUM_BITS NUM_LEDS*BYTES_PER_LED*8
 
