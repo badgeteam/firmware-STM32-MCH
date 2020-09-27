@@ -98,6 +98,8 @@ enum
 #if CFG_TUD_CDC
   ITF_NUM_CDC = 0,
   ITF_NUM_CDC_DATA,
+  ITF_NUM_CDC_1,
+  ITF_NUM_CDC_1_DATA,
 #endif
 
 #if CFG_TUD_VENDOR
@@ -120,9 +122,11 @@ enum
 
 #define EPNUM_CDC_NOTIF     0x01
 #define EPNUM_CDC           0x02
-#define EPNUM_VENDOR           0x03
-#define EPNUM_HID           0x04
-#define EPNUM_MIDI          0x05
+#define EPNUM_CDC_NOTIF_1   0x03
+#define EPNUM_CDC_1			0x04
+#define EPNUM_VENDOR        0x05
+#define EPNUM_HID           0x06
+#define EPNUM_MIDI          0x07
 
 uint8_t const desc_configuration[] =
 {
@@ -132,6 +136,7 @@ uint8_t const desc_configuration[] =
 #if CFG_TUD_CDC
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
   TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 3+CFG_TUD_CDC, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3+CFG_TUD_CDC+1, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC, 0x80 | EPNUM_CDC_1, 64),
 #endif
 
 #if CFG_TUD_VENDOR

@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -61,6 +63,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define BUTTON_TICK 5
 #define UART_SERIAL huart2
+#define UART_FPGA huart1
 
 //#define UART_WEBUSB huart2
 
