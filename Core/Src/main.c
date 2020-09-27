@@ -151,7 +151,15 @@ int main(void)
 
   //button_init();
   static uint32_t decimator;
-
+	// Reset LCD to SPI mode
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET); // LCD RESET
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET); // LCD MODE (LOW = SPI)
+	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET); // LCD MODE (HIGH = PARALLEL)
+	HAL_Delay(1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET); // LCD RESET
+	// Turn on backlight
+	//adjust_PWM_DC(&htim4, 100.0);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET); // LCD BL
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -163,16 +171,6 @@ int main(void)
 		#if CFG_TUD_CDC
 				cdc_task();
 		#endif
-
-		// Reset LCD to SPI mode
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET); // LCD RESET
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET); // LCD MODE (LOW = SPI)
-		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET); // LCD MODE (HIGH = PARALLEL)
-		HAL_Delay(1);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET); // LCD RESET
-	    // Turn on backlight
-		//adjust_PWM_DC(&htim4, 100.0);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET); // LCD BL
 
 
 		#if CFG_TUD_HID
