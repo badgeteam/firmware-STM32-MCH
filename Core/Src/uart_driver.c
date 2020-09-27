@@ -10,9 +10,6 @@
 #define APP_RX_DATA_SIZE  512
 #define APP_TX_DATA_SIZE  512
 
-#define WEBUSB_RX_SIZE 32
-#define WEBUSB_TX_SIZE 512
-
 uint8_t UserRxBufferFS[2][APP_RX_DATA_SIZE];
 uint8_t UserTxBufferFS[2][APP_TX_DATA_SIZE];
 
@@ -199,7 +196,7 @@ void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const* p_line_coding)
 //			Error_Handler();
 //		}
 
-		uart->Instance->BRR = UART_BRR_SAMPLING8(HAL_RCC_GetPCLK2Freq(), UART_SERIAL.Init.BaudRate);
+		uart->Instance->BRR = UART_BRR_SAMPLING8(HAL_RCC_GetPCLK2Freq(), uart->Init.BaudRate);
 
 		/* Start reception: provide the buffer pointer with offset and the buffer size */
 		bufferpos[itf] = 0;
@@ -239,12 +236,12 @@ void UART_Early_Exit(UART_HandleTypeDef *huart, uint32_t CNDTR)  {
 			tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[1]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
 		} else if(huart == &UART_FPGA) {
 			bufferpos[1] = !bufferpos[1];
-			if (HAL_UART_Receive_DMA(&UART_FPGA, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*WEBUSB_TX_SIZE/2], WEBUSB_TX_SIZE / 2) != HAL_OK) {
+			if (HAL_UART_Receive_DMA(&UART_FPGA, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE / 2) != HAL_OK) {
 				Error_Handler();
 			}
-			uint32_t len = WEBUSB_TX_SIZE/2 - CNDTR; //Received number of bytes by the DMA
-			uint32_t offset = len > WEBUSB_TX_SIZE/4 ? WEBUSB_TX_SIZE/4 : 0;
-			len = len % (WEBUSB_TX_SIZE/4); //Remove the Half way callback
+			uint32_t len = APP_TX_DATA_SIZE/2 - CNDTR; //Received number of bytes by the DMA
+			uint32_t offset = len > APP_TX_DATA_SIZE/4 ? APP_TX_DATA_SIZE/4 : 0;
+			len = len % (APP_TX_DATA_SIZE/4); //Remove the Half way callback
 
 			tud_cdc_n_write(0, &UserTxBufferFS[1][!bufferpos[1]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
 		}
