@@ -6,6 +6,7 @@
  */
 #include "main.h"
 #include "led_driver.h"
+#include "stm32f1xx_it.h"
 
 #define NUM_LEDS 6
 #define LED0 60
@@ -16,20 +17,46 @@
 #define NUM_BITS NUM_LEDS*BYTES_PER_LED*8
 
 uint32_t framebuffer[NUM_LEDS];
-static uint16_t tmp_led_data[NUM_BITS];
-volatile uint16_t led_data_bitpos;
+static uint16_t tmp_led_data[NUM_BITS+1];
 
 TIM_HandleTypeDef *htim_used;
+extern DMA_HandleTypeDef hdma_tim1_ch1;
 uint32_t TIM_Channel;
 
+static void halfTransfer() {
+
+}
+
+static void fullTransfer() {
+}
+
+
 void init_leds(TIM_HandleTypeDef *htim, uint32_t Channel) {
-    for(int i = 0; i < NUM_LEDS; i++) {
+	htim_used = htim;
+	TIM_Channel = Channel;
+
+	for(int i = 0; i < NUM_LEDS; i++) {
     	framebuffer[i] = 0x0000FF00;
     }
-    htim_used = htim;
-    TIM_Channel = Channel;
-    HAL_TIM_Base_Start_IT(htim_used);
 
+
+	hdma_tim1_ch1.XferCpltCallback = fullTransfer;
+	hdma_tim1_ch1.XferHalfCpltCallback = halfTransfer;
+
+    HAL_DMA_Init(&hdma_tim1_ch1);
+
+
+
+    htim_used->hdma[TIM_DMA_ID_CC1]->XferCpltCallback = fullTransfer;
+    htim_used->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = halfTransfer;
+
+
+    htim_used->Instance->CCR3 = 0;
+    HAL_TIM_Base_Start(htim_used);
+    if(HAL_TIMEx_PWMN_Start(htim_used, TIM_CHANNEL_1) != HAL_OK) HardFault_Handler();
+    if(HAL_TIMEx_PWMN_Start(htim_used, TIM_Channel) != HAL_OK) HardFault_Handler();
+
+    tmp_led_data[NUM_BITS] = 0; //Blank PWM after transmission
     update_leds();
 }
 
@@ -40,21 +67,12 @@ void update_leds() {
 			tmp_led_data[i*BITS_PER_LED+bitpos] = alias_region[31 - bitpos] ? LED0 : LED1;
 		}
 	}
-	htim_used->Instance->CCR3 = tmp_led_data[0];
-	led_data_bitpos = 1;
-	HAL_TIMEx_PWMN_Start(htim_used, TIM_Channel);
+
+    HAL_DMA_Start_IT(&hdma_tim1_ch1, (uint32_t)tmp_led_data, (uint32_t)&(htim_used->Instance->CCR3), NUM_BITS+1);
+
+    /* Enable the TIM Capture/Compare 1 DMA request */
+    __HAL_TIM_ENABLE_DMA(htim_used, TIM_DMA_CC1);
 
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if(htim == htim_used) {
-		if(led_data_bitpos == NUM_BITS) {
-			htim_used->Instance->CCR3 = 0;
-			HAL_TIMEx_PWMN_Stop(htim_used, TIM_Channel);
-			return;
-		}
-		htim_used->Instance->CCR3 = tmp_led_data[led_data_bitpos];
-		led_data_bitpos++;
-	}
-}
 

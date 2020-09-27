@@ -14,3 +14,4 @@ cmake_install.cmake
 cmake-build-debug
 /bootloader_build/
 /Debug/
+build/*
