@@ -136,7 +136,7 @@ uint8_t const desc_configuration[] =
 #if CFG_TUD_CDC
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
   TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 3+CFG_TUD_CDC, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
-  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3+CFG_TUD_CDC+1, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC, 0x80 | EPNUM_CDC_1, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3+CFG_TUD_CDC, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC_1, 0x80 | EPNUM_CDC_1, 64),
 #endif
 
 #if CFG_TUD_VENDOR
