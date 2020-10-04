@@ -191,12 +191,9 @@ void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const* p_line_coding)
 		uart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
 		uart->Init.Mode = UART_MODE_TX_RX;
 
-//		if (HAL_UART_Init(&UART_SERIAL) != HAL_OK) {
-//			/* Initialization Error */
-//			Error_Handler();
-//		}
 
-		uart->Instance->BRR = UART_BRR_SAMPLING8(HAL_RCC_GetPCLK2Freq(), uart->Init.BaudRate);
+
+		HAL_UART_Init(uart);
 
 		/* Start reception: provide the buffer pointer with offset and the buffer size */
 		bufferpos[itf] = 0;
@@ -211,14 +208,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 					APP_TX_DATA_SIZE / 2) != HAL_OK) {
 			Error_Handler();
 		}
-		tud_cdc_write(&UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4); //Invert bufferpos again because we inverted it for the receive call
+		tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4); //Invert bufferpos again because we inverted it for the receive call
 	} else if(huart == &UART_FPGA) {
 		bufferpos[1] = !bufferpos[1];
 		if (HAL_UART_Receive_DMA(&UART_SERIAL, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2],
 					APP_TX_DATA_SIZE / 2) != HAL_OK) {
 			Error_Handler();
 		}
-		tud_cdc_write(&UserTxBufferFS[1][!bufferpos[1]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4); //Invert bufferpos again because we inverted it for the receive call
+		tud_cdc_n_write(1, &UserTxBufferFS[1][!bufferpos[1]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4); //Invert bufferpos again because we inverted it for the receive call
 	}
 }
 
@@ -233,7 +230,7 @@ void UART_Early_Exit(UART_HandleTypeDef *huart, uint32_t CNDTR)  {
 			uint32_t offset = len > APP_TX_DATA_SIZE/4 ? APP_TX_DATA_SIZE/4 : 0;
 			len = len % (APP_TX_DATA_SIZE/4); //Remove the Half way callback
 
-			tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[1]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
+			tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
 		} else if(huart == &UART_FPGA) {
 			bufferpos[1] = !bufferpos[1];
 			if (HAL_UART_Receive_DMA(&UART_FPGA, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE / 2) != HAL_OK) {
@@ -243,7 +240,7 @@ void UART_Early_Exit(UART_HandleTypeDef *huart, uint32_t CNDTR)  {
 			uint32_t offset = len > APP_TX_DATA_SIZE/4 ? APP_TX_DATA_SIZE/4 : 0;
 			len = len % (APP_TX_DATA_SIZE/4); //Remove the Half way callback
 
-			tud_cdc_n_write(0, &UserTxBufferFS[1][!bufferpos[1]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
+			tud_cdc_n_write(1, &UserTxBufferFS[1][!bufferpos[1]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
 		}
 }
 
