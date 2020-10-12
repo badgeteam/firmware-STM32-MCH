@@ -60,6 +60,33 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Vusb_Pin GPIO_PIN_0
+#define Vusb_GPIO_Port GPIOA
+#define Vbat_Pin GPIO_PIN_1
+#define Vbat_GPIO_Port GPIOA
+#define CS_Pin GPIO_PIN_4
+#define CS_GPIO_Port GPIOA
+#define CS_EXTI_IRQn EXTI4_IRQn
+#define SAO_IO3_Pin GPIO_PIN_0
+#define SAO_IO3_GPIO_Port GPIOB
+#define SAO_IO2_Pin GPIO_PIN_1
+#define SAO_IO2_GPIO_Port GPIOB
+#define SAO_IO1_Pin GPIO_PIN_2
+#define SAO_IO1_GPIO_Port GPIOB
+#define SAO_IO0_Pin GPIO_PIN_10
+#define SAO_IO0_GPIO_Port GPIOB
+#define EXT_IO0_Pin GPIO_PIN_12
+#define EXT_IO0_GPIO_Port GPIOB
+#define EXT_IO1_Pin GPIO_PIN_13
+#define EXT_IO1_GPIO_Port GPIOB
+#define LED_PWR_Pin GPIO_PIN_14
+#define LED_PWR_GPIO_Port GPIOB
+#define LCD_RESET_Pin GPIO_PIN_4
+#define LCD_RESET_GPIO_Port GPIOB
+#define LCD_MODE_Pin GPIO_PIN_5
+#define LCD_MODE_GPIO_Port GPIOB
+#define LCD_REQUEST_Pin GPIO_PIN_8
+#define LCD_REQUEST_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define BUTTON_TICK 5
 #define UART_SERIAL huart2

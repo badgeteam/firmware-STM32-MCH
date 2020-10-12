@@ -42,7 +42,7 @@ void init_leds(TIM_HandleTypeDef *htim, uint32_t Channel) {
 	TIM_Channel = Channel;
 
 	for(int i = 0; i < NUM_LEDS; i++) {
-    	framebuffer[i] = 0x0000FF00;
+    	framebuffer[i] = 0x00000000;
     }
 
 
@@ -64,8 +64,8 @@ void init_leds(TIM_HandleTypeDef *htim, uint32_t Channel) {
 
 void update_leds() {
 	for(int i = 0; i < NUM_LEDS; i++) {
-		framebuffer[i] = framebuffer[i] << 8;
-		if(framebuffer[i] == 0) framebuffer[i] = 0x000000FF;
+		//framebuffer[i] = framebuffer[i] << 8;
+		//if(framebuffer[i] == 0) framebuffer[i] = 0x000000FF;
 		uint32_t *alias_region = (uint32_t *) (((uint32_t) &framebuffer[i]-0x20000000)*32+0x22000000);
 		for(int bitpos = 0; bitpos < BITS_PER_LED; bitpos++) {
 			tmp_led_data[i*BITS_PER_LED+bitpos] = alias_region[31 - bitpos] ? LED0 : LED1;
@@ -77,6 +77,13 @@ void update_leds() {
     /* Enable the TIM Capture/Compare 1 DMA request */
     __HAL_TIM_ENABLE_DMA(&htim4, TIM_DMA_CC1);
 
+}
+
+void clear_leds() {
+	for(int i = 0; i < NUM_LEDS; i++) {
+		framebuffer[0] = 0;
+	}
+	update_leds();
 }
 
 
