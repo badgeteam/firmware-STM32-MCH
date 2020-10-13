@@ -64,9 +64,6 @@ void Error_Handler(void);
 #define Vusb_GPIO_Port GPIOA
 #define Vbat_Pin GPIO_PIN_1
 #define Vbat_GPIO_Port GPIOA
-#define CS_Pin GPIO_PIN_4
-#define CS_GPIO_Port GPIOA
-#define CS_EXTI_IRQn EXTI4_IRQn
 #define SAO_IO3_Pin GPIO_PIN_0
 #define SAO_IO3_GPIO_Port GPIOB
 #define SAO_IO2_Pin GPIO_PIN_1

@@ -77,27 +77,26 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 
 		break;
 	}
+	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+}
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
+	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+}
+
+void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi) {
+	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
 void spi_init(SPI_HandleTypeDef *spi) {
 	spi_hw = spi;
 	hdma_spi_rx = spi->hdmarx;
 	hdma_spi_tx = spi->hdmatx;
+	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 
 }
 
 void exti_handler(uint32_t pinstate) {
-	if(pinstate == 0) { //Start of transmission
-		HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
-	} else {
-		HAL_SPI_Abort(spi_hw);
-	}
-}
-
-void HAL_GPIO_EXTI_Callback(uint16_t pin) {
-	if(pin == CS_Pin) {
-		exti_handler(HAL_GPIO_ReadPin(CS_GPIO_Port, CS_Pin));
-	}
 
 }
 
