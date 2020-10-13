@@ -10,21 +10,34 @@
 #include "lcd_helper.h"
 #include "spkr_helper.h"
 #include "led_driver.h"
+#include <string.h>
 
 #define MESSAGE_SIZE 18
+
+#define VERSION 1
 
 DMA_HandleTypeDef *hdma_spi_rx;
 DMA_HandleTypeDef *hdma_spi_tx;
 
 SPI_HandleTypeDef *spi_hw;
 
-volatile uint8_t tx_buffer[MESSAGE_SIZE];
-volatile uint8_t rx_buffer[MESSAGE_SIZE];
+extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
+
+uint8_t tx_buffer[MESSAGE_SIZE];
+uint8_t rx_buffer[MESSAGE_SIZE];
+
+GPIO_TypeDef *port_gpio[] = {SAO_IO0_GPIO_Port, SAO_IO1_GPIO_Port, SAO_IO2_GPIO_Port, SAO_IO3_GPIO_Port, EXT_IO0_GPIO_Port, EXT_IO1_GPIO_Port};
+uint32_t pin_gpio[] = {SAO_IO0_Pin, SAO_IO1_Pin, SAO_IO2_Pin, SAO_IO3_Pin, EXT_IO0_Pin, EXT_IO1_Pin};
+
+uint8_t status_reg[6];
+uint8_t pinstate_prev;
+uint8_t pinstate_mask;
+
 
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 	uint16_t *command = (uint16_t *) rx_buffer;
-	uint16_t *freq;
-	uint16_t *duty;
+
 
 	switch(*command) {
 	case 0x0000:
@@ -41,20 +54,27 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		Set_brightness(rx_buffer[2]);
 		break;
 	case 0x0003:	//Set speaker
+	{
+		uint16_t *freq;
+		uint16_t *duty;
 		freq = (uint16_t *) &rx_buffer[2];
 		duty = (uint16_t *) &rx_buffer[4];
 		set_spkr(*freq, *duty);
+	}
 		break;
 	case 0x0004:	//Set LED
 		set_pixel(rx_buffer[2], rx_buffer[3] << 24 | rx_buffer[4] << 16 | rx_buffer[5] << 8 | rx_buffer[6]);
 		break;
 	case 0x0005:	//ADC Sample
 		if(rx_buffer[2] == 0) {
-
+			HAL_ADC_DeInit(&hadc1);
+			HAL_ADC_DeInit(&hadc2);
 		} else if(rx_buffer[2] == 1) {
-
+			HAL_ADC_Init(&hadc1);
+			HAL_ADC_Init(&hadc2);
 		} else if(rx_buffer[2] == 2) {
-
+			HAL_ADC_Start_IT(&hadc1);
+			HAL_ADC_Start_IT(&hadc2);
 		}
 		break;
 	case 0x0006:	//Reset
@@ -62,13 +82,26 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		clear_leds();
 		break;
 	case 0x0007:
-
+		for(int i = 0; i < 5; i++) {
+			GPIO_InitTypeDef GPIO_InitStruct = {0};
+			GPIO_InitStruct.Pin = pin_gpio[i];
+     	    GPIO_InitStruct.Pull = GPIO_NOPULL;
+			GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+			if(rx_buffer[i+2]) {
+				GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+			} else {
+				GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+			}
+			HAL_GPIO_Init(port_gpio[i], &GPIO_InitStruct);
+		}
 		break;
 	case 0x0008:
-
+		for(int i = 0; i < 5; i++) {
+			HAL_GPIO_WritePin(port_gpio[i], pin_gpio[i], rx_buffer[i+2]);
+		}
 		break;
 	case 0x0009:
-
+		pinstate_mask = rx_buffer[2];
 		break;
 	case 0xF000:
 
@@ -93,13 +126,32 @@ void spi_init(SPI_HandleTypeDef *spi) {
 	hdma_spi_rx = spi->hdmarx;
 	hdma_spi_tx = spi->hdmatx;
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+	status_reg[5] = VERSION;
 
 }
 
-void exti_handler(uint32_t pinstate) {
+void spi_update() {
+	uint8_t pinstate = 0;
+	for(int i = 0; i < 5; i++) {
+		pinstate = (pinstate << 1) | HAL_GPIO_ReadPin(port_gpio[i], pin_gpio[i]);
+	}
+	status_reg[4] = pinstate;
+
+	if((pinstate ^ pinstate_prev) & pinstate_mask) {
+
+	}
+	pinstate_prev = pinstate;
+
+	memcpy((void *) &tx_buffer[2], (void *) status_reg, 6);
 
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-
+	if(hadc == &hadc1) {
+		uint16_t *V = (uint16_t *) &status_reg[0];
+		*V = HAL_ADC_GetValue(hadc);
+	} else {
+		uint16_t *V = (uint16_t *) &status_reg[2];
+		*V = HAL_ADC_GetValue(hadc);
+	}
 }
