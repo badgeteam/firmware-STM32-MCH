@@ -117,9 +117,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 	}
 
 	if(!readCommand(&tx_buffer[9])){
-		for(int i = 0; i < 9; i++) {
-			tx_buffer[9+i] = 0;
-		}
+		memcpy(&tx_buffer[9], tx_buffer, 9);
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
 	} else {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 1);
@@ -148,10 +146,27 @@ void spi_init(SPI_HandleTypeDef *spi) {
 	pinstate_mask = 0;
 }
 
+/*
+ * Returns how much commands can still be stored in the command queue
+ */
+uint32_t commandSpace() {
+	if(comq_writeptr == comq_readptr) return COM_SIZE;
+	if(comq_writeptr < comq_readptr) {
+		return COM_SIZE - (comq_readptr - comq_writeptr);
+	}
+	return comq_writeptr - comq_readptr;
+}
+
+/*
+ * Returns pointer to an 8-byte command
+ */
 uint8_t* getCommandSlot() {
 	return command_queue[comq_writeptr];
 }
 
+/*
+ * Indicate that the previous fetched command slot has been filled
+ */
 void commandReady() {
 	comq_writeptr++;
 	if(comq_writeptr == COM_SIZE) comq_writeptr = 0;
