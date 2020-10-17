@@ -15,6 +15,7 @@
 #define MESSAGE_SIZE 18
 
 #define VERSION 1
+#define COM_SIZE 128
 
 DMA_HandleTypeDef *hdma_spi_rx;
 DMA_HandleTypeDef *hdma_spi_tx;
@@ -26,6 +27,10 @@ extern ADC_HandleTypeDef hadc2;
 
 uint8_t tx_buffer[MESSAGE_SIZE];
 uint8_t rx_buffer[MESSAGE_SIZE];
+
+uint8_t command_queue[COM_SIZE][6];
+uint8_t comq_writeptr;
+uint8_t comq_readptr;
 
 GPIO_TypeDef *port_gpio[] = {SAO_IO0_GPIO_Port, SAO_IO1_GPIO_Port, SAO_IO2_GPIO_Port, SAO_IO3_GPIO_Port, EXT_IO0_GPIO_Port, EXT_IO1_GPIO_Port};
 uint32_t pin_gpio[] = {SAO_IO0_Pin, SAO_IO1_Pin, SAO_IO2_Pin, SAO_IO3_Pin, EXT_IO0_Pin, EXT_IO1_Pin};
@@ -110,6 +115,16 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 
 		break;
 	}
+
+	if(!readCommand(&tx_buffer[9])){
+		for(int i = 0; i < 9; i++) {
+			tx_buffer[9+i] = 0;
+		}
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
+	} else {
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 1);
+	}
+
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
@@ -128,7 +143,31 @@ void spi_init(SPI_HandleTypeDef *spi) {
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 	status_reg[5] = VERSION;
 
+	comq_writeptr = 0;
+	comq_readptr = 0;
+	pinstate_mask = 0;
 }
+
+uint8_t* getCommandSlot() {
+	return command_queue[comq_writeptr];
+}
+
+void commandReady() {
+	comq_writeptr++;
+	if(comq_writeptr == COM_SIZE) comq_writeptr = 0;
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
+}
+
+uint32_t readCommand(uint8_t* buffer) {
+	if(comq_writeptr == comq_readptr) {
+		return 0;
+	}
+	memcpy(buffer, command_queue[comq_readptr], 6);
+	comq_readptr++;
+	if(comq_readptr == COM_SIZE) comq_readptr = 0;
+	return 1;
+}
+
 
 void spi_update() {
 	uint8_t pinstate = 0;
@@ -138,7 +177,9 @@ void spi_update() {
 	status_reg[4] = pinstate;
 
 	if((pinstate ^ pinstate_prev) & pinstate_mask) {
-
+		uint8_t* com = getCommandSlot();
+		com[0] = (pinstate ^ pinstate_prev) & pinstate_mask;
+		commandReady();
 	}
 	pinstate_prev = pinstate;
 

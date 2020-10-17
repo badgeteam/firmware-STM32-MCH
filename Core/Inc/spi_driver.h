@@ -10,5 +10,11 @@
 #include "main.h"
 
 void spi_init(SPI_HandleTypeDef *spi);
+void spi_update();
+
+uint8_t* getCommandSlot();
+void commandReady();
+uint32_t readCommand(uint8_t* buffer);
+
 
 #endif /* INC_SPI_DRIVER_H_ */

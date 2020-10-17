@@ -171,15 +171,9 @@ int main(void)
   tusb_init();
   spi_init(&hspi1);
   init_leds(&htim1, TIM_CHANNEL_3);
-
-//  HAL_TIM_Base_Start(&htim2);
-//  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-
-  //button_init();
-  static uint32_t decimator;
-
-  // Reset LCD to SPI mode and enable backlight driver
   init_lcd();
+
+  uint32_t decimator = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -211,6 +205,7 @@ int main(void)
 
 		if(last_tick != HAL_GetTick()) {
 			last_tick = HAL_GetTick();
+			spi_update();
 			decimator++;
 			if(decimator == 1000) {
 				update_leds();
