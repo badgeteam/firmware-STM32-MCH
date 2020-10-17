@@ -28,7 +28,7 @@ extern ADC_HandleTypeDef hadc2;
 uint8_t tx_buffer[MESSAGE_SIZE];
 uint8_t rx_buffer[MESSAGE_SIZE];
 
-uint8_t command_queue[COM_SIZE][6];
+uint8_t command_queue[COM_SIZE][8];
 uint8_t comq_writeptr;
 uint8_t comq_readptr;
 
@@ -174,11 +174,13 @@ void spi_update() {
 	for(int i = 0; i < 5; i++) {
 		pinstate = (pinstate << 1) | HAL_GPIO_ReadPin(port_gpio[i], pin_gpio[i]);
 	}
-	status_reg[4] = pinstate;
+	status_reg[4] = pinstate | HAL_GPIO_ReadPin(LCD_REQUEST_GPIO_Port, LCD_REQUEST_Pin) << 6 | HAL_GPIO_ReadPin(LCD_MODE_GPIO_Port, LCD_MODE_Pin) << 7;
 
 	if((pinstate ^ pinstate_prev) & pinstate_mask) {
 		uint8_t* com = getCommandSlot();
-		com[0] = (pinstate ^ pinstate_prev) & pinstate_mask;
+		com[0] = 0x01;
+		com[1] = 0x00;
+		com[2] = (pinstate ^ pinstate_prev) & pinstate_mask;
 		commandReady();
 	}
 	pinstate_prev = pinstate;
