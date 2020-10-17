@@ -63,8 +63,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		uint16_t *freq;
 		uint16_t *duty;
 		freq = (uint16_t *) &rx_buffer[2];
-		duty = (uint16_t *) &rx_buffer[4];
-		set_spkr(*freq, *duty);
+		set_spkr(*freq, rx_buffer[4]);
 	}
 		break;
 	case 0x0004:	//Set LED

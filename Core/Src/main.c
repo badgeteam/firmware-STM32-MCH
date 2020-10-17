@@ -206,6 +206,7 @@ int main(void)
 		if(last_tick != HAL_GetTick()) {
 			last_tick = HAL_GetTick();
 			spi_update();
+			lcd_helper();
 			decimator++;
 			if(decimator == 1000) {
 				update_leds();
