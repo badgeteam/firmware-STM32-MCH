@@ -157,7 +157,7 @@ uint32_t commandSpace() {
 }
 
 /*
- * Returns pointer to an 8-byte command
+ * Returns pointer to an 8-byte command. Only use this from the main thread
  */
 uint8_t* getCommandSlot() {
 	return command_queue[comq_writeptr];

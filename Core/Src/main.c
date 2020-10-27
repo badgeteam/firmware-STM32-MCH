@@ -29,6 +29,7 @@
 #include "led_driver.h"
 #include "lcd_helper.h"
 #include "spi_driver.h"
+#include "webusb.h"
 //#include "interrupt_pin.h"
 /* USER CODE END Includes */
 
@@ -39,7 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define URL  "webusb.hackz.one"
+#define URL  "webusb.wittemanlabs.nl"
 
 const tusb_desc_webusb_url_t desc_url =
 {
@@ -195,7 +196,7 @@ int main(void)
 		//		midi_task();
 		#endif
 
-		//webusb_task();
+		webusb_task();
 
 		//button_task();
 
@@ -989,7 +990,7 @@ void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uin
 //--------------------------------------------------------------------+
 // WebUSB use vendor class
 //--------------------------------------------------------------------+
-#if TUD_VENDOR
+#if CFG_TUD_VENDOR
 // Invoked when received VENDOR control request
 bool tud_vendor_control_request_cb(uint8_t rhport, tusb_control_request_t const * request)
 {
@@ -1014,21 +1015,6 @@ bool tud_vendor_control_request_cb(uint8_t rhport, tusb_control_request_t const 
       }
 
     case 0x22:
-      // Webserial simulate the CDC_REQUEST_SET_CONTROL_LINE_STATE (0x22) to
-      // connect and disconnect.
-      web_serial_connected = (request->wValue != 0);
-
-      // Always lit LED if connected
-      if ( web_serial_connected )
-      {
-        //board_led_write(true);
-        //blink_interval_ms = BLINK_ALWAYS_ON;
-
-
-      }else
-      {
-        blink_interval_ms = BLINK_MOUNTED;
-      }
 
       // response with status OK
       return tud_control_status(rhport, request);

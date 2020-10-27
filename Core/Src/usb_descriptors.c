@@ -33,7 +33,7 @@
  *   [MSB]         HID | MSC | CDC          [LSB]
  */
 #define _PID_MAP(itf, n)  ( (CFG_TUD_##itf) << (n) )
-#define USB_PID           (0x4000 | _PID_MAP(CDC, 0) | _PID_MAP(MSC, 1) | _PID_MAP(VENDOR, 4) )
+#define USB_PID          0x0F9A
 
 //--------------------------------------------------------------------+
 // Device Descriptors
@@ -50,7 +50,7 @@ tusb_desc_device_t const desc_device =
 
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor           = 0xCafe,
+    .idVendor           = 0x16D0,
     .idProduct          = USB_PID,
     .bcdDevice          = 0x0100,
 
@@ -135,12 +135,12 @@ uint8_t const desc_configuration[] =
 
 #if CFG_TUD_CDC
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
-  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 3+CFG_TUD_CDC, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
-  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3+CFG_TUD_CDC, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC_1, 0x80 | EPNUM_CDC_1, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 3, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC_1, 0x80 | EPNUM_CDC_1, 64),
 #endif
 
 #if CFG_TUD_VENDOR
-  TUD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, 3+CFG_TUD_CDC+CFG_TUD_VENDOR, EPNUM_VENDOR, 0x80 | EPNUM_VENDOR, 64),
+  TUD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, 4, EPNUM_VENDOR, 0x80 | EPNUM_VENDOR, 64),
 #endif
 
 #if CFG_TUD_HID
@@ -205,7 +205,7 @@ uint8_t const * tud_descriptor_bos_cb(void)
   return desc_bos;
 }
 
-#ifdef TUD_VENDOR
+#if CFG_TUD_VENDOR
 uint8_t const desc_ms_os_20[] =
 {
   // Set header: length, type, windows version, total length
@@ -244,20 +244,20 @@ TU_VERIFY_STATIC(sizeof(desc_ms_os_20) == MS_OS_20_DESC_LEN, "Incorrect size");
 char const* string_desc_arr [] =
 {
   (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
-  "HackZone",                    // 1: Manufacturer
-  "CampZone20 Badge",            // 2: Product
+  "Badge.team",                    // 1: Manufacturer
+  "MCH2021 Badge",            // 2: Product
   "123456",                      // 3: Serials, should use chip ID
-#ifdef CFG_TUD_CDC
-  "CampZone20 UART",             // 4: CDC Interface
+#if CFG_TUD_CDC
+  "MCH2021 UART",             // 4: CDC Interface
 #endif
-#ifdef CFG_TUD_VENDOR
-  "CampZone20 WebUSB",     // 5: MSC Interface
+#if CFG_TUD_VENDOR
+  "MCH2021 WebUSB",     // 5: MSC Interface
 #endif
-#ifdef CFG_TUD_HID
-  "CampZone20 HID",              // 6: HID
+#if CFG_TUD_HID
+  "MCH2021 HID",              // 6: HID
 #endif
-#ifdef CFG_TUD_MIDI
-  "CampZone20 MIDI"              // 7: MIDI
+#if CFG_TUD_MIDI
+  "MCH2021 MIDI"              // 7: MIDI
 #endif
 };
 
