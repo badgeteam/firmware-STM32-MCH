@@ -135,22 +135,22 @@ uint8_t const desc_configuration[] =
 
 #if CFG_TUD_CDC
   // Interface number, string index, EP notification address and size, EP data address (out, in) and size.
-  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 3, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
-  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 3, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC_1, 0x80 | EPNUM_CDC_1, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 4, 0x80 | EPNUM_CDC_NOTIF, 8, EPNUM_CDC, 0x80 | EPNUM_CDC, 64),
+  TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_1, 4, 0x80 | EPNUM_CDC_NOTIF_1, 8, EPNUM_CDC_1, 0x80 | EPNUM_CDC_1, 64),
 #endif
 
 #if CFG_TUD_VENDOR
-  TUD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, 4, EPNUM_VENDOR, 0x80 | EPNUM_VENDOR, 64),
+  TUD_VENDOR_DESCRIPTOR(ITF_NUM_VENDOR, 5, EPNUM_VENDOR, 0x80 | EPNUM_VENDOR, 64),
 #endif
 
 #if CFG_TUD_HID
         // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval
-  TUD_HID_DESCRIPTOR(ITF_NUM_HID, 3+CFG_TUD_CDC+CFG_TUD_VENDOR+CFG_TUD_HID, HID_PROTOCOL_NONE, sizeof(desc_hid_report), 0x80 | EPNUM_HID, 16, 10),
+  TUD_HID_DESCRIPTOR(ITF_NUM_HID, 6, HID_PROTOCOL_NONE, sizeof(desc_hid_report), 0x80 | EPNUM_HID, 16, 10),
 #endif
 
 #if CFG_TUD_MIDI
   // Interface number, string index, EP Out & EP In address, EP size
-  TUD_MIDI_DESCRIPTOR(ITF_NUM_MIDI, 3+CFG_TUD_CDC+CFG_TUD_VENDOR+CFG_TUD_HID+CFG_TUD_MIDI, EPNUM_MIDI, 0x80 | EPNUM_MIDI, 16)
+  TUD_MIDI_DESCRIPTOR(ITF_NUM_MIDI, 7, EPNUM_MIDI, 0x80 | EPNUM_MIDI, 16)
 #endif
 };
 

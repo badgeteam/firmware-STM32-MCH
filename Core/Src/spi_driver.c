@@ -11,6 +11,7 @@
 #include "spkr_helper.h"
 #include "led_driver.h"
 #include <string.h>
+#include "tusb.h"
 
 #define MESSAGE_SIZE 18
 
@@ -107,19 +108,21 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 	case 0x0009:
 		pinstate_mask = rx_buffer[2];
 		break;
-	case 0xF000:
-
-		break;
 	case 0xF001:
-
+	case 0xF002:
+	case 0xF003:
+	case 0xF004:
+	case 0xF005:
+	case 0xF006:
+		tud_vendor_write(&rx_buffer[2], rx_buffer[0]);
 		break;
 	}
 
 	if(!readCommand(&tx_buffer[9])){
 		memcpy(&tx_buffer[9], tx_buffer, 9);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
-	} else {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 1);
+	} else {
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
 	}
 
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
@@ -151,9 +154,9 @@ void spi_init(SPI_HandleTypeDef *spi) {
 uint32_t commandSpace() {
 	if(comq_writeptr == comq_readptr) return COM_SIZE;
 	if(comq_writeptr < comq_readptr) {
-		return COM_SIZE - (comq_readptr - comq_writeptr);
+		return (comq_readptr - comq_writeptr);
 	}
-	return comq_writeptr - comq_readptr;
+	return COM_SIZE - (comq_writeptr - comq_readptr);
 }
 
 /*
@@ -176,7 +179,7 @@ uint32_t readCommand(uint8_t* buffer) {
 	if(comq_writeptr == comq_readptr) {
 		return 0;
 	}
-	memcpy(buffer, command_queue[comq_readptr], 6);
+	memcpy(buffer, command_queue[comq_readptr], 8);
 	comq_readptr++;
 	if(comq_readptr == COM_SIZE) comq_readptr = 0;
 	return 1;
