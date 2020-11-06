@@ -26,8 +26,8 @@ SPI_HandleTypeDef *spi_hw;
 extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 
-uint8_t tx_buffer[MESSAGE_SIZE];
-uint8_t rx_buffer[MESSAGE_SIZE];
+volatile uint8_t tx_buffer[MESSAGE_SIZE];
+volatile uint8_t rx_buffer[MESSAGE_SIZE];
 
 uint8_t command_queue[COM_SIZE][8];
 uint8_t comq_writeptr;
@@ -114,6 +114,12 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 	case 0xF004:
 	case 0xF005:
 	case 0xF006:
+	case 0xF007:
+	case 0xF008:
+	case 0xF009:
+	case 0xF00A:
+	case 0xF00B:
+	case 0xF00C:
 		tud_vendor_write(&rx_buffer[2], rx_buffer[0]);
 		break;
 	}
