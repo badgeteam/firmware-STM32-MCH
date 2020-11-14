@@ -70,7 +70,7 @@ void SPI1_IRQHandler(void);
 void USART1_IRQHandler(void);
 void USART2_IRQHandler(void);
 /* USER CODE BEGIN EFP */
-
+void EXTI4_IRQHandler(void);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 //#include "led_driver.h"
+#include "spi_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -395,6 +396,10 @@ void USART2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void EXTI4_IRQHandler(void)
+{
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
+	spi_reset_transmission();
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -353,7 +353,14 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(SPI1_IRQn);
   /* USER CODE BEGIN SPI1_MspInit 1 */
+    //Override gpio pin 4 with interrupt rising. To generate interrupt when transmission is finished.
+    GPIO_InitStruct.Pin = GPIO_PIN_4;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+	HAL_NVIC_SetPriority(EXTI4_IRQn, 10, 0);
+    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
   /* USER CODE END SPI1_MspInit 1 */
   }
 

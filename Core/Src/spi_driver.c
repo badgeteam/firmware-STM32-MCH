@@ -142,6 +142,10 @@ void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi) {
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
+void spi_reset_transmission() {
+	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+}
+
 void spi_init(SPI_HandleTypeDef *spi) {
 	spi_hw = spi;
 	hdma_spi_rx = spi->hdmarx;

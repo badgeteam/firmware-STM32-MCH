@@ -11,6 +11,7 @@
 
 void spi_init(SPI_HandleTypeDef *spi);
 void spi_update();
+void spi_reset_transmission();
 
 uint32_t commandSpace();
 uint8_t* getCommandSlot();
