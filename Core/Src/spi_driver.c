@@ -131,18 +131,19 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 0);
 	}
 
-	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+	//HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
-	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+	//HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
 void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi) {
-	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
+	//HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
 void spi_reset_transmission() {
+	HAL_SPI_Abort(spi_hw);
 	HAL_SPI_TransmitReceive_DMA(spi_hw, tx_buffer, rx_buffer, MESSAGE_SIZE);
 }
 
