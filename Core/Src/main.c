@@ -168,6 +168,7 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   //HAL_I2C_EnableListen_IT(&hi2c1);
+  webusb_init();
   uart_init();
   tusb_init();
   spi_init(&hspi1);

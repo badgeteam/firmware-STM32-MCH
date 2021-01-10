@@ -5,7 +5,7 @@
  *      Author: joris
  */
 #include "uart_driver.h"
-
+#include "webusb.h"
 /* Define size for the receive and transmit buffer over CDC */
 #define APP_RX_DATA_SIZE  512
 #define APP_TX_DATA_SIZE  512
@@ -209,6 +209,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 			Error_Handler();
 		}
 		tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4); //Invert bufferpos again because we inverted it for the receive call
+		handleUART(&UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+APP_TX_DATA_SIZE/4], APP_TX_DATA_SIZE/4);
 	} else if(huart == &UART_FPGA) {
 		bufferpos[1] = !bufferpos[1];
 		if (HAL_UART_Receive_DMA(&UART_SERIAL, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2],
@@ -231,6 +232,7 @@ void UART_Early_Exit(UART_HandleTypeDef *huart, uint32_t CNDTR)  {
 			len = len % (APP_TX_DATA_SIZE/4); //Remove the Half way callback
 
 			tud_cdc_n_write(0, &UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+offset], len); //Invert bufferpos again because we inverted it for the receive call
+			handleUART(&UserTxBufferFS[0][!bufferpos[0]*APP_TX_DATA_SIZE/2+offset], len);
 		} else if(huart == &UART_FPGA) {
 			bufferpos[1] = !bufferpos[1];
 			if (HAL_UART_Receive_DMA(&UART_FPGA, (uint8_t*) &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE / 2) != HAL_OK) {
@@ -247,7 +249,8 @@ void UART_Early_Exit(UART_HandleTypeDef *huart, uint32_t CNDTR)  {
 void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart) {
 	if(huart == &UART_SERIAL) {
 			tud_cdc_n_write(0, &UserTxBufferFS[0][bufferpos[0]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE/4);
-		} else if(huart == &UART_FPGA) {
+			handleUART(&UserTxBufferFS[0][bufferpos[0]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE/4);
+	} else if(huart == &UART_FPGA) {
 			tud_cdc_n_write(1, &UserTxBufferFS[1][bufferpos[1]*APP_TX_DATA_SIZE/2], APP_TX_DATA_SIZE/4);
 		}
 }

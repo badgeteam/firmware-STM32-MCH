@@ -12,6 +12,7 @@
 #include "led_driver.h"
 #include <string.h>
 #include "tusb.h"
+#include "webusb.h"
 
 #define MESSAGE_SIZE 18
 
@@ -120,7 +121,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 	case 0xF00A:
 	case 0xF00B:
 	case 0xF00C:
-		tud_vendor_write(&rx_buffer[2], rx_buffer[0]);
+		handleBadge(&rx_buffer[2], rx_buffer[0]);
 		break;
 	}
 

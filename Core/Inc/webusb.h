@@ -9,9 +9,13 @@
 #define INC_WEBUSB_H_
 
 #include "main.h"
-
+void webusb_init();
 void webusb_task();
-void parseComputer(uint8_t *data, uint32_t len);
-void parseBadge(uint8_t *data, uint32_t len);
+
+void handleBadge(uint8_t *data, uint32_t len);
+void handleUART(uint8_t *data, uint32_t len);
+
+uint32_t availableUART();
+uint32_t readUART(uint8_t *data, uint32_t len);
 
 #endif /* INC_WEBUSB_H_ */
