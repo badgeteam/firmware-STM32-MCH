@@ -66,8 +66,6 @@ ADC_HandleTypeDef hadc2;
 I2C_HandleTypeDef hi2c2;
 
 SPI_HandleTypeDef hspi1;
-DMA_HandleTypeDef hdma_spi1_rx;
-DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim4;
 DMA_HandleTypeDef hdma_tim4_ch1;
@@ -94,9 +92,9 @@ static void MX_USB_PCD_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_ADC2_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -157,15 +155,15 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
-  MX_SPI1_Init();
   MX_TIM4_Init();
   MX_I2C2_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   //HAL_I2C_EnableListen_IT(&hi2c1);
   uart_init();
   tusb_init();
   spi_init(&hspi1);
-  init_leds(&htim1, TIM_CHANNEL_3);
+  init_leds(&htim4, TIM_CHANNEL_3);
   init_lcd();
 
   uint32_t decimator = 0;
@@ -444,7 +442,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_INPUT;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
@@ -634,12 +632,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-  /* DMA1_Channel3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
   /* DMA1_Channel4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
@@ -671,23 +663,26 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ESP32_EN_Pin|ESP32_BL_Pin|SDCARD_PWR_Pin|LCD_RESET_Pin
-                          |LCD_MODE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, ESP32_EN_Pin|SDCARD_PWR_Pin|ESP32_WK_Pin|LCD_RESET_Pin
+                          |LCD_MODE_Pin|ESP32_BL_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_PWR_GPIO_Port, LED_PWR_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : ESP32_EN_Pin ESP32_BL_Pin LED_PWR_Pin SDCARD_PWR_Pin
-                           LCD_RESET_Pin LCD_MODE_Pin */
-  GPIO_InitStruct.Pin = ESP32_EN_Pin|ESP32_BL_Pin|LED_PWR_Pin|SDCARD_PWR_Pin
-                          |LCD_RESET_Pin|LCD_MODE_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(USB_PU_GPIO_Port, USB_PU_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pins : ESP32_EN_Pin LED_PWR_Pin SDCARD_PWR_Pin ESP32_WK_Pin
+                           LCD_RESET_Pin LCD_MODE_Pin ESP32_BL_Pin */
+  GPIO_InitStruct.Pin = ESP32_EN_Pin|LED_PWR_Pin|SDCARD_PWR_Pin|ESP32_WK_Pin
+                          |LCD_RESET_Pin|LCD_MODE_Pin|ESP32_BL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CHARGING_Pin SAO_IO0_Pin SAO_IO1_Pin LCD_REQUEST_Pin */
-  GPIO_InitStruct.Pin = CHARGING_Pin|SAO_IO0_Pin|SAO_IO1_Pin|LCD_REQUEST_Pin;
+  /*Configure GPIO pins : CHARGING_Pin SAO_IO0_Pin SAO_IO1_Pin SAO_IO2_Pin */
+  GPIO_InitStruct.Pin = CHARGING_Pin|SAO_IO0_Pin|SAO_IO1_Pin|SAO_IO2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -697,6 +692,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : USB_PU_Pin */
+  GPIO_InitStruct.Pin = USB_PU_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(USB_PU_GPIO_Port, &GPIO_InitStruct);
 
 }
 

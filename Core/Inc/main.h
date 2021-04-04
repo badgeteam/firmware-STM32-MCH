@@ -66,8 +66,8 @@ void Error_Handler(void);
 #define Vbat_GPIO_Port GPIOA
 #define ESP32_EN_Pin GPIO_PIN_0
 #define ESP32_EN_GPIO_Port GPIOB
-#define ESP32_BL_Pin GPIO_PIN_1
-#define ESP32_BL_GPIO_Port GPIOB
+#define BATT_TEMP_Pin GPIO_PIN_1
+#define BATT_TEMP_GPIO_Port GPIOB
 #define CHARGING_Pin GPIO_PIN_2
 #define CHARGING_GPIO_Port GPIOB
 #define SAO_IO0_Pin GPIO_PIN_12
@@ -78,14 +78,20 @@ void Error_Handler(void);
 #define LED_PWR_GPIO_Port GPIOB
 #define SDCARD_PWR_Pin GPIO_PIN_15
 #define SDCARD_PWR_GPIO_Port GPIOB
+#define USB_PU_Pin GPIO_PIN_15
+#define USB_PU_GPIO_Port GPIOA
+#define ESP32_WK_Pin GPIO_PIN_3
+#define ESP32_WK_GPIO_Port GPIOB
 #define LCD_RESET_Pin GPIO_PIN_4
 #define LCD_RESET_GPIO_Port GPIOB
 #define LCD_MODE_Pin GPIO_PIN_5
 #define LCD_MODE_GPIO_Port GPIOB
 #define ARGB_Pin GPIO_PIN_6
 #define ARGB_GPIO_Port GPIOB
-#define LCD_REQUEST_Pin GPIO_PIN_8
-#define LCD_REQUEST_GPIO_Port GPIOB
+#define SAO_IO2_Pin GPIO_PIN_7
+#define SAO_IO2_GPIO_Port GPIOB
+#define ESP32_BL_Pin GPIO_PIN_8
+#define ESP32_BL_GPIO_Port GPIOB
 #define LCD_BACKLIGHT_Pin GPIO_PIN_9
 #define LCD_BACKLIGHT_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

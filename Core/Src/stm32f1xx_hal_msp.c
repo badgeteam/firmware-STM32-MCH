@@ -24,10 +24,6 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-extern DMA_HandleTypeDef hdma_spi1_rx;
-
-extern DMA_HandleTypeDef hdma_spi1_tx;
-
 extern DMA_HandleTypeDef hdma_tim4_ch1;
 
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -114,12 +110,18 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     __HAL_RCC_ADC1_CLK_ENABLE();
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
+    PB1     ------> ADC1_IN9
     */
     GPIO_InitStruct.Pin = Vusb_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(Vusb_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = BATT_TEMP_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    HAL_GPIO_Init(BATT_TEMP_GPIO_Port, &GPIO_InitStruct);
 
     /* ADC1 interrupt Init */
     HAL_NVIC_SetPriority(ADC1_2_IRQn, 15, 0);
@@ -172,8 +174,11 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
+    PB1     ------> ADC1_IN9
     */
     HAL_GPIO_DeInit(Vusb_GPIO_Port, Vusb_Pin);
+
+    HAL_GPIO_DeInit(BATT_TEMP_GPIO_Port, BATT_TEMP_Pin);
 
     /* ADC1 interrupt DeInit */
   /* USER CODE BEGIN ADC1:ADC1_2_IRQn disable */
@@ -306,61 +311,18 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     PA6     ------> SPI1_MISO
     PA7     ------> SPI1_MOSI
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    /* SPI1 DMA Init */
-    /* SPI1_RX Init */
-    hdma_spi1_rx.Instance = DMA1_Channel2;
-    hdma_spi1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_spi1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi1_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_spi1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_spi1_rx.Init.Mode = DMA_NORMAL;
-    hdma_spi1_rx.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_spi1_rx) != HAL_OK)
-    {
-      Error_Handler();
-    }
+    GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    __HAL_LINKDMA(hspi,hdmarx,hdma_spi1_rx);
-
-    /* SPI1_TX Init */
-    hdma_spi1_tx.Instance = DMA1_Channel3;
-    hdma_spi1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_spi1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi1_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_spi1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_spi1_tx.Init.Mode = DMA_NORMAL;
-    hdma_spi1_tx.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_spi1_tx) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(hspi,hdmatx,hdma_spi1_tx);
-
-    /* SPI1 interrupt Init */
-    HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(SPI1_IRQn);
   /* USER CODE BEGIN SPI1_MspInit 1 */
-    //Override gpio pin 4 with interrupt rising. To generate interrupt when transmission is finished.
-    GPIO_InitStruct.Pin = GPIO_PIN_4;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	HAL_NVIC_SetPriority(EXTI4_IRQn, 10, 0);
-    HAL_NVIC_EnableIRQ(EXTI4_IRQn);
   /* USER CODE END SPI1_MspInit 1 */
   }
 
@@ -390,12 +352,6 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
 
-    /* SPI1 DMA DeInit */
-    HAL_DMA_DeInit(hspi->hdmarx);
-    HAL_DMA_DeInit(hspi->hdmatx);
-
-    /* SPI1 interrupt DeInit */
-    HAL_NVIC_DisableIRQ(SPI1_IRQn);
   /* USER CODE BEGIN SPI1_MspDeInit 1 */
 
   /* USER CODE END SPI1_MspDeInit 1 */

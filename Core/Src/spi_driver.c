@@ -8,7 +8,6 @@
 #include "spi_driver.h"
 #include "main.h"
 #include "lcd_helper.h"
-#include "spkr_helper.h"
 #include "led_driver.h"
 #include <string.h>
 #include "tusb.h"
@@ -33,8 +32,8 @@ uint8_t command_queue[COM_SIZE][8];
 uint8_t comq_writeptr;
 uint8_t comq_readptr;
 
-GPIO_TypeDef *port_gpio[] = {SAO_IO0_GPIO_Port, SAO_IO1_GPIO_Port, SAO_IO2_GPIO_Port, SAO_IO3_GPIO_Port, EXT_IO0_GPIO_Port, EXT_IO1_GPIO_Port};
-uint32_t pin_gpio[] = {SAO_IO0_Pin, SAO_IO1_Pin, SAO_IO2_Pin, SAO_IO3_Pin, EXT_IO0_Pin, EXT_IO1_Pin};
+GPIO_TypeDef *port_gpio[] = {SAO_IO0_GPIO_Port, SAO_IO1_GPIO_Port, SAO_IO2_GPIO_Port};
+uint32_t pin_gpio[] = {SAO_IO0_Pin, SAO_IO1_Pin, SAO_IO2_Pin};
 
 uint8_t status_reg[6];
 uint8_t pinstate_prev;
@@ -60,12 +59,6 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		Set_brightness(rx_buffer[2]);
 		break;
 	case 0x0003:	//Set speaker
-	{
-		uint16_t *freq;
-		uint16_t *duty;
-		freq = (uint16_t *) &rx_buffer[2];
-		set_spkr(*freq, rx_buffer[4]);
-	}
 		break;
 	case 0x0004:	//Set LED
 		set_pixel(rx_buffer[2], rx_buffer[3] << 24 | rx_buffer[4] << 16 | rx_buffer[5] << 8 | rx_buffer[6]);
@@ -83,11 +76,10 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		}
 		break;
 	case 0x0006:	//Reset
-		disable_spkr();
 		clear_leds();
 		break;
 	case 0x0007:
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 3; i++) {
 			GPIO_InitTypeDef GPIO_InitStruct = {0};
 			GPIO_InitStruct.Pin = pin_gpio[i];
      	    GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -101,7 +93,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *spi) {
 		}
 		break;
 	case 0x0008:
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 3; i++) {
 			HAL_GPIO_WritePin(port_gpio[i], pin_gpio[i], rx_buffer[i+2]);
 		}
 		break;
@@ -198,10 +190,10 @@ uint32_t readCommand(uint8_t* buffer) {
 
 void spi_update() {
 	uint8_t pinstate = 0;
-	for(int i = 0; i < 5; i++) {
+	for(int i = 0; i < 3; i++) {
 		pinstate = (pinstate << 1) | HAL_GPIO_ReadPin(port_gpio[i], pin_gpio[i]);
 	}
-	status_reg[4] = pinstate | HAL_GPIO_ReadPin(LCD_REQUEST_GPIO_Port, LCD_REQUEST_Pin) << 6 | HAL_GPIO_ReadPin(LCD_MODE_GPIO_Port, LCD_MODE_Pin) << 7;
+	status_reg[4] = pinstate | HAL_GPIO_ReadPin(LCD_MODE_GPIO_Port, LCD_MODE_Pin) << 7;
 
 	if((pinstate ^ pinstate_prev) & pinstate_mask) {
 		uint8_t* com = getCommandSlot();
