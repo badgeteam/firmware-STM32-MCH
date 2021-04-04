@@ -82,8 +82,8 @@ void cdc_task(void)
     tud_cdc_n_write_flush(0);
     if(disablepins && HAL_GetTick() > disabletimeout) {
     	disablepins = 0;
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, 1);
+		HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, 1);
+		HAL_GPIO_WritePin(ESP32_BL_GPIO_Port, ESP32_BL_Pin, 1);
     }
 
     if ( tud_cdc_n_available(1) && UART_FPGA.gState == HAL_UART_STATE_READY)
@@ -119,8 +119,8 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
 		} else {
 			disablepins = 0;
 		}
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, !rts);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, !dtr);
+		HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, !rts);
+		HAL_GPIO_WritePin(ESP32_BL_GPIO_Port, ESP32_BL_Pin, !dtr);
 	}
 }
 
