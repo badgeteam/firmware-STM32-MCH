@@ -671,11 +671,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, ESP32_EN_Pin|SDCARD_PWR_Pin|ESP32_WK_Pin|LCD_RESET_Pin
-                          |LCD_MODE_Pin|ESP32_BL_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, ESP32_EN_Pin|LED_PWR_Pin|ESP32_BL_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_PWR_GPIO_Port, LED_PWR_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, SDCARD_PWR_Pin|ESP32_WK_Pin|LCD_RESET_Pin|LCD_MODE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_PU_GPIO_Port, USB_PU_Pin, GPIO_PIN_SET);

@@ -96,8 +96,8 @@ void Error_Handler(void);
 #define LCD_BACKLIGHT_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define BUTTON_TICK 5
-#define UART_SERIAL huart2
-#define UART_FPGA huart1
+#define UART_SERIAL huart1
+#define UART_FPGA huart2
 
 //#define UART_WEBUSB huart2
 
