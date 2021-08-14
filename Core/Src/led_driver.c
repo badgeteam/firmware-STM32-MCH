@@ -45,18 +45,9 @@ void init_leds(TIM_HandleTypeDef *htim, uint32_t Channel) {
     	framebuffer[i] = 0x00000000;
     }
 
-
-	hdma_tim4_ch1.XferCpltCallback = fullTransfer;
-	hdma_tim4_ch1.XferHalfCpltCallback = halfTransfer;
-
-    HAL_DMA_Init(&hdma_tim4_ch1);
-
-
-    htim_used->Instance->CCR3 = 0;
+    htim_used->Instance->CCR1 = 0;  //Hardcoded channel here, remove someday
     HAL_TIM_Base_Start(htim_used);
-    HAL_TIM_Base_Start(&htim4);
-    if(HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) HardFault_Handler();
-    if(HAL_TIMEx_PWMN_Start(htim_used, TIM_Channel) != HAL_OK) HardFault_Handler();
+    if(HAL_TIM_PWM_Start(htim_used, Channel) != HAL_OK) HardFault_Handler();
 
     tmp_led_data[NUM_BITS] = 0; //Blank PWM after transmission
     update_leds();
@@ -72,10 +63,7 @@ void update_leds() {
 		}
 	}
 
-    HAL_DMA_Start_IT(&hdma_tim4_ch1, (uint32_t)tmp_led_data, (uint32_t)&(htim_used->Instance->CCR3), NUM_BITS+1);
-
-    /* Enable the TIM Capture/Compare 1 DMA request */
-    __HAL_TIM_ENABLE_DMA(&htim4, TIM_DMA_CC1);
+	HAL_TIM_PWM_Start_DMA(htim_used, TIM_Channel, tmp_led_data, NUM_BITS+1);
 
 }
 

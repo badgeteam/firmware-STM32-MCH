@@ -165,7 +165,7 @@ int main(void)
   uart_init();
   tusb_init();
   spi_init(&hspi1);
-  init_leds(&htim4, TIM_CHANNEL_3);
+  init_leds(&htim4, TIM_CHANNEL_1);
   init_lcd();
 
   uint32_t decimator = 0;
